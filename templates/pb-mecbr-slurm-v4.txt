@@ -75,7 +75,7 @@ Autoscale = $Autoscale
         slurm.hpc = true
 
         [[[cluster-init cyclecloud/slurm:execute]]]
-        [[[cluster-init pb-mecbr:execute:1.0.0]]]
+        [[[cluster-init pb-mecbr:hpc:1.0.0]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
@@ -95,7 +95,7 @@ Autoscale = $Autoscale
       slurm.hpc = true
 
       [[[cluster-init cyclecloud/slurm:execute]]]
-      [[[cluster-init pb-mecbr:execute:1.0.0]]]
+      [[[cluster-init pb-mecbr:gpu:1.0.0]]]
       
       [[[network-interface eth0]]]
       AssociatePublicIpAddress = $ExecuteNodesPublic
