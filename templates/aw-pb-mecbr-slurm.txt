@@ -4,8 +4,8 @@
 
 [cluster PB-MECBR-Slurm]
 FormLayout = selectionpanel
+#IconURL = <url>
 Category = Schedulers
-
 Autoscale = $Autoscale
 
     [[node defaults]]
@@ -21,8 +21,8 @@ Autoscale = $Autoscale
         cshared.server.legacy_links_disabled = true
         cyclecloud.mounts.shared.disabled = true
         cyclecloud.exports.shared.disabled = true
-        #cyclecloud.mounts.sched.disabled = true
-        #cyclecloud.exports.sched.disabled = true
+        cyclecloud.mounts.sched.disabled = true
+        cyclecloud.exports.sched.disabled = true
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false
     
@@ -33,6 +33,13 @@ Autoscale = $Autoscale
         type = nfs
         mountpoint = /shared
         export_path = $NFSSharedExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSServerName
+
+        [[[configuration cyclecloud.mounts.nfs_sched]]]
+        type = nfs
+        mountpoint = $NFSSchedMountPoint
+        export_path = $NFSSchedExport
 	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
 	    address = $NFSServerName
 
@@ -225,7 +232,6 @@ Order = 20
         Config.Entries := {[Value="19.05.5-1"], [Value="18.08.9-1"]}
         DefaultValue = 19.05.5-1
 
-froup show
     [[parameters Software]]
     Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
     Order = 10
@@ -241,14 +247,14 @@ froup show
         Label = HPC OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = cycle.image.centos7
+        DefaultValue = /subscriptions/56894188-35b8-4f72-b5ee-f371269f0e0e/resourceGroups/aw-compute/providers/Microsoft.Compute/images/aw-vm-hpc
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
 
         [[[parameter GPUImageName]]]
         Label = GPU OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = cycle.image.centos7
+        DefaultValue = /subscriptions/56894188-35b8-4f72-b5ee-f371269f0e0e/resourceGroups/aw-compute/providers/Microsoft.Compute/images/aw-vm-gpu
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
 
         [[[parameter MasterClusterInitSpecs]]]
@@ -301,30 +307,36 @@ Order = 30
 
         [[[parameter NFSServerName]]]
         Label = NFS Server name or IP address
-        Description = The NFS server name or ip address.
-        DefaultValue = 10.0.8.4
+        Description = The NFS server name or IP address.
+        DefaultValue = 10.10.32.36
         Required = True
 
         [[[parameter NFSSharedExport]]]
-        Label = NFS Shared Home Export
+        Label = NFS Shared Export
         Description = "Configure the /shared filesystem.  This is the Home filesystem and general purpose shared space. (Mountpoint is hard-code to /shared since user Home directories must exist at /shared/home )"
-        DefaultValue = /aw-mecbr-shared
-        Required = True
-
-        [[[parameter NFSSharedMountPoint]]]
-        Label = NFS Shared Home Mountpoint 
-        Description = The /shared/home export on the NFS Server.
-        DefaultValue = /shared
+        DefaultValue = /mnt/exports/shared
         Required = True
 
         [[[parameter NFSDataExport]]]
         Label = NFS Data Export
         Description = "Configure the /data filesystem"
-        DefaultValue = /aw-mecbr-data
+        DefaultValue = /mnt/exports/data
         Required = false
 
         [[[parameter NFSDataMountPoint]]]
         Label = NFS Data Mountpoint 
-        Description = The /data/home export on the NFS Server.
+        Description = The /data mountpoint 
         DefaultValue = /data
+        Required = false
+
+        [[[parameter NFSSchedExport]]]
+        Label = NFS Sched Export
+        Description = "Configure the /sched filesystem"
+        DefaultValue = /mnt/exports/sched
+        Required = false
+
+        [[[parameter NFSSchedMountPoint]]]
+        Label = NFS Data Mountpoint 
+        Description = The /sched mountpoint
+        DefaultValue = /sched
         Required = false

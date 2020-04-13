@@ -1,11 +1,11 @@
 ################################
-## SLURM + Singularity + NFS  ##
+## SLURM + NFS                ##
 ################################
 
 [cluster PB-MECBR-Slurm]
 FormLayout = selectionpanel
 Category = Schedulers
-
+#IconUrl = <url>
 Autoscale = $Autoscale
 
     [[node defaults]]
@@ -21,20 +21,25 @@ Autoscale = $Autoscale
         cshared.server.legacy_links_disabled = true
         cyclecloud.mounts.shared.disabled = true
         cyclecloud.exports.shared.disabled = true
-        #cyclecloud.mounts.sched.disabled = true
-        #cyclecloud.exports.sched.disabled = true
+        cyclecloud.mounts.sched.disabled = true
+        cyclecloud.exports.sched.disabled = true
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false
-        singularity.version = $SingularityVersion
     
         [[[cluster-init cyclecloud/slurm:default]]]
-        [[[cluster-init singularity:default:2.0.1]]]
         [[[cluster-init pb-mecbr:default:1.0.0]]]
 
         [[[configuration cyclecloud.mounts.nfs_shared]]]
         type = nfs
         mountpoint = /shared
         export_path = $NFSSharedExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSServerName
+        
+        [[[configuration cyclecloud.mounts.nfs_sched]]]
+        type = nfs
+        mountpoint = $NFSSchedMountPoint
+        export_path = $NFSSchedExport
 	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
 	    address = $NFSServerName
 
@@ -44,7 +49,7 @@ Autoscale = $Autoscale
         export_path = $NFSDataExport
 	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
 	    address = $NFSServerName
-        
+
     [[node master]]
     MachineType = $MasterMachineType
     ImageName = $MasterImageName
@@ -54,10 +59,10 @@ Autoscale = $Autoscale
         [[[configuration]]]
 
         [[[cluster-init cyclecloud/slurm:master]]]
-        [[[cluster-init singularity:master:2.0.1]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $UsePublicNetwork
+        #PrivateIP = 
 
         [[[input-endpoint ganglia]]]
         PrivatePort = 8652
@@ -78,7 +83,7 @@ Autoscale = $Autoscale
         slurm.hpc = true
 
         [[[cluster-init cyclecloud/slurm:execute]]]
-        [[[cluster-init pb-mecbr:execute:1.0.0]]]
+        [[[cluster-init pb-mecbr:hpc:1.0.0]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
@@ -98,7 +103,7 @@ Autoscale = $Autoscale
       slurm.hpc = true
 
       [[[cluster-init cyclecloud/slurm:execute]]]
-      [[[cluster-init pb-mecbr:execute:1.0.0]]]
+      [[[cluster-init pb-mecbr:gpu:1.0.0]]]
       
       [[[network-interface eth0]]]
       AssociatePublicIpAddress = $ExecuteNodesPublic
@@ -112,20 +117,7 @@ Order = 1
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template := "<table><tr><td><img src='static/cloud/cluster/ui/ClusterIcon/slurm.png' width='192' height='192'></td></tr><tr><td><p>Slurm is a highly configurable open source workload manager. See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"
-    
-    [[parameters About Singularity]]   
-        [[[parameter Singularity]]]
-        HideLabel = true
-        Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "<table><tr><td><img src='https://github.com/CycleCloudCommunity/singularity/raw/master/icon.png' width='192' height='192'></td></tr><tr><td><p>Singularity is a system for building and running Linux Containers. See the <a href=\"https://singularity.lbl.gov/\" target=\"_blank\">Singularity project site</a>for an overview.</p></td></tr></table>"
-
-        [[[parameter Readme]]]
-        HideLabel = true
-        Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "Follow the instructions in the <a href=\"https://github.com/CycleCloudCommunity/singularity/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment."
-
-
-
+        
 
 [parameters Required Settings]
 Order = 10
@@ -138,7 +130,7 @@ Order = 10
         Label = Region
         Description = Deployment Location
         ParameterType = Cloud.Region
-        DefaultValue = ussouthcentral
+        DefaultValue = useast
 
         [[[parameter MasterMachineType]]]
         Label = Master VM Type
@@ -240,15 +232,7 @@ Order = 20
         Config.FreeForm = true
         Config.Entries := {[Value="19.05.5-1"], [Value="18.08.9-1"]}
         DefaultValue = 19.05.5-1
-
-    [[parameters SingularityParams ]]
-    Description = "Section for configuring Singularity versions etc"
-    Order = 5
-
-        [[[parameter SingularityVersion]]]
-        Label = Singularity Version
-        Description = Singularity version to use
-        DefaultValue = 3.1.1
+        
 
     [[parameters Software]]
     Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
@@ -326,13 +310,25 @@ Order = 30
         [[[parameter NFSServerName]]]
         Label = NFS Server name or IP address
         Description = The NFS server name or ip address.
-        DefaultValue = 10.0.8.4
+        DefaultValue = 10.129.54.148
+        Required = True
+
+        [[[parameter NFSSchedExport]]]
+        Label = NFS Sched  Export
+        Description = "Configure the /sched filesystem.
+        DefaultValue = /sched
+        Required = True
+
+        [[[parameter NFSSchedMountPoint]]]
+        Label = NFS Shared Home Mountpoint 
+        Description = The /sched export on the NFS Server.
+        DefaultValue = /sched
         Required = True
 
         [[[parameter NFSSharedExport]]]
         Label = NFS Shared Home Export
         Description = "Configure the /shared filesystem.  This is the Home filesystem and general purpose shared space. (Mountpoint is hard-code to /shared since user Home directories must exist at /shared/home )"
-        DefaultValue = /aw-mecbr-shared
+        DefaultValue = /anfhpc
         Required = True
 
         [[[parameter NFSSharedMountPoint]]]
@@ -344,11 +340,11 @@ Order = 30
         [[[parameter NFSDataExport]]]
         Label = NFS Data Export
         Description = "Configure the /data filesystem"
-        DefaultValue = /aw-mecbr-data
+        DefaultValue = /brapps
         Required = false
 
         [[[parameter NFSDataMountPoint]]]
         Label = NFS Data Mountpoint 
-        Description = The /data/home export on the NFS Server.
-        DefaultValue = /data
+        Description = The apps export on the NFS Server.
+        DefaultValue = /brapps
         Required = false
