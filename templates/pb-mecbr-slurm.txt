@@ -310,7 +310,7 @@ Order = 30
         [[[parameter NFSServerName]]]
         Label = NFS Server name or IP address
         Description = The NFS server name or ip address.
-        DefaultValue = 10.129.54.148
+        DefaultValue = 10.10.10.10
         Required = True
 
         [[[parameter NFSSchedExport]]]
