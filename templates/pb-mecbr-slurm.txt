@@ -5,7 +5,7 @@
 [cluster PB-MECBR-Slurm]
 FormLayout = selectionpanel
 Category = Schedulers
-#IconUrl = <url>
+IconUrl = https://logodownload.org/wp-content/uploads/2014/05/petrobras-logo-5-1.png
 Autoscale = $Autoscale
 
     [[node defaults]]
@@ -117,8 +117,7 @@ Order = 1
         [[[parameter slurm]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
-        Config.Template := "<table><tr><td><img src='static/cloud/cluster/ui/ClusterIcon/slurm.png' width='192' height='192'></td></tr><tr><td><p>Slurm is a highly configurable open source workload manager. See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"
-        
+        Config.Template := "<table><tr><td><img src='https://logodownload.org/wp-content/uploads/2014/05/petrobras-logo-5-1.png' width='192' height='131'></td></tr><tr><td><p>Cyclecloud project with Slurm + Singularity + Azure NetApp Files (ANF).</p><p>See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"        
 
 [parameters Required Settings]
 Order = 10
