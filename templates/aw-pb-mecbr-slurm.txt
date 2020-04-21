@@ -362,12 +362,12 @@ Description = "Use a Lustre cluster as a NAS. Settings for defining the Lustre c
     [[parameter LustreVersion]]
     Label = Lustre Version
     Description = The Lustre version to use
-    DefaultValue = "2.13"
+    DefaultValue = "2.12"
     Config.FreeForm = false
     Config.Plugin = pico.control.AutoCompleteDropdown
         [[[list Config.Entries]]]
-        Name = "2.13"
-        Label = "2.13"
+        Name = "2.10"
+        Label = "2.10"
         [[[list Config.Entries]]]
         Name = "2.12"
         Label = "2.12"
