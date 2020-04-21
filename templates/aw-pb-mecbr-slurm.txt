@@ -304,7 +304,7 @@ Order = 20
         Config.Label = Access execute nodes from the Internet
         Conditions.Excluded := UsePublicNetwork isnt true
 
-[parameters External Filesystems]
+[parameters External NFS Filesystems]
 Order = 30
 
     [[parameters NFS Settings]]
