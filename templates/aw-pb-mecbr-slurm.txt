@@ -55,6 +55,13 @@ Autoscale = $Autoscale
 	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
 	    address = $NFSServerName
         
+        [[[configuration cyclecloud.mounts.nfs_cache]]]
+        type = nfs
+        mountpoint = $NFSCacheMountPoint
+        export_path = $NFSCacheExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSCacheName
+
     [[node master]]
     MachineType = $MasterMachineType
     ImageName = $MasterImageName
@@ -322,30 +329,47 @@ Order = 30
         DefaultValue = /mnt/exports/shared
         Required = True
        
-
         [[[parameter NFSDataExport]]]
         Label = NFS Data Export
         Description = "Configure the /data filesystem"
         DefaultValue = /mnt/exports/data
-        Required = false
+        Required = True
 
         [[[parameter NFSDataMountPoint]]]
         Label = NFS Data Mountpoint 
         Description = The /data mountpoint 
         DefaultValue = /data
-        Required = false
+        Required = True
 
         [[[parameter NFSSchedExport]]]
         Label = NFS Sched Export
         Description = "Configure the /sched filesystem"
         DefaultValue = /mnt/exports/sched
-        Required = false
+        Required = True
 
         [[[parameter NFSSchedMountPoint]]]
         Label = NFS Data Mountpoint 
         Description = The /sched mountpoint
         DefaultValue = /sched
-        Required = false
+        Required = True
+
+        [[[parameter NFSCacheName]]]
+        Label = NFS Cache name or IP address
+        Description = The NFS cache name or IP address.
+        DefaultValue = 10.10.32.36
+        Required = True
+
+        [[[parameter NFSCacheExport]]]
+        Label = NFS Cache Export
+        Description = "Configure the /cache filesystem export or namespace"
+        DefaultValue = /mnt/exports/cache
+        Required = True
+              
+        [[[parameter NFSCacheMountPoint]]]
+        Label = NFS Cache Mountpoint
+        Description = "Configure the /cache filesystem"
+        DefaultValue = /cache
+        Required = True
 
 [parameters Lustre Settings]
 Order = 25

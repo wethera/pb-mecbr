@@ -28,6 +28,7 @@ Autoscale = $Autoscale
         lustre.cluster_name = $LustreClusterName
         lustre.version = $LustreVersion
         lustre.mount_point = $LustreMountPoint
+        
         [[[cluster-init cyclecloud/slurm:default]]]
         [[[cluster-init pb-mecbr:default:1.0.0]]]
         [[[cluster-init lfs:client]]]
@@ -72,14 +73,12 @@ Autoscale = $Autoscale
         PrivatePort = 8652
         PublicPort = 8652
 
-
     [[nodearray hpc]]
     MachineType = $HPCMachineType
     ImageName = $HPCImageName
     MaxCoreCount = $MaxHPCExecuteCoreCount
     Azure.MaxScalesetSize = $HPCMaxScalesetSize
     AdditionalClusterInitSpecs = $HPCClusterInitSpecs
-
 
         [[[configuration]]]
         slurm.autoscale = true
@@ -91,7 +90,6 @@ Autoscale = $Autoscale
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
-
 
    [[nodearray gpu]]
    MachineType = $GPUMachineType
@@ -211,7 +209,6 @@ Order = 10
         ParameterType = Azure.Subnet
         Required = True
 
-
 [parameters Advanced Settings]
 Order = 20
 
@@ -235,7 +232,6 @@ Order = 20
         Config.FreeForm = true
         Config.Entries := {[Value="19.05.5-1"], [Value="18.08.9-1"]}
         DefaultValue = 19.05.5-1
-        
 
     [[parameters Software]]
     Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
@@ -280,7 +276,6 @@ Order = 20
         Description = Cluster init specs to apply to HPC execute nodes
         ParameterType = Cloud.ClusterInitSpecs
 	
-
     [[parameters Advanced Networking]]
     Description = Advanced networking settings
 
@@ -332,24 +327,26 @@ Order = 30
         Label = NFS Data Export
         Description = "Configure the /data filesystem"
         DefaultValue = /brapps
-        Required = false
+        Required = True
 
         [[[parameter NFSDataMountPoint]]]
         Label = NFS Data Mountpoint 
         Description = The apps export on the NFS Server.
         DefaultValue = /brapps
-        Required = false
+        Required = True
+        
         [[[parameter NFSSchedExport]]]
         Label = NFS Sched  Export
         Description = "Configure the /sched filesystem.
         DefaultValue = /sched
-        Required = false
+        Required = True
 
         [[[parameter NFSSchedMountPoint]]]
         Label = NFS Shared Home Mountpoint 
         Description = The /sched export on the NFS Server.
         DefaultValue = /sched
-        Required = false
+        Required = True
+
 [parameters Lustre Settings]
 Order = 25
 Description = "Use a Lustre cluster as a NAS. Settings for defining the Lustre cluster"
