@@ -80,14 +80,12 @@ Autoscale = $Autoscale
         PrivatePort = 8652
         PublicPort = 8652
 
-
     [[nodearray hpc]]
     MachineType = $HPCMachineType
     ImageName = $HPCImageName
     MaxCoreCount = $MaxHPCExecuteCoreCount
     Azure.MaxScalesetSize = $HPCMaxScalesetSize
     AdditionalClusterInitSpecs = $HPCClusterInitSpecs
-
 
         [[[configuration]]]
         slurm.autoscale = true
@@ -99,7 +97,6 @@ Autoscale = $Autoscale
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
-
 
    [[nodearray gpu]]
    MachineType = $GPUMachineType
@@ -121,8 +118,7 @@ Autoscale = $Autoscale
       AssociatePublicIpAddress = $ExecuteNodesPublic
 
 [parameters About]
-Order = 1
-
+    
     [[parameters About PB-MECBR-Slurm]]
 
         [[[parameter slurm]]]
@@ -131,8 +127,7 @@ Order = 1
         Config.Template := "<table><tr><td><img src='static/cloud/cluster/ui/ClusterIcon/slurm.png' width='192' height='192'></td></tr><tr><td><p>Slurm is a highly configurable open source workload manager. See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"
 
 [parameters Required Settings]
-Order = 10
-
+    
     [[parameters Virtual Machines ]]
     Description = "The cluster, in this case, has two roles: the scheduler master-node with shared filer and the execute hosts. Configure which VM types to use based on the requirements of your application."
     Order = 20
@@ -164,7 +159,6 @@ Order = 10
 
     [[parameters Auto-Scaling]]
     Description = "The cluster can autoscale to the workload, adding execute hosts as jobs are queued. To enable this check the box below and choose the initial and maximum core counts for the cluster"
-    Order = 30
 
         [[[parameter Autoscale]]]
         Label = Autoscale
@@ -211,7 +205,6 @@ Order = 10
         Widget.Label = Use low priority instances for GPU execute hosts
 
     [[parameters Networking]]
-    Order = 40
 
         [[[parameter SubnetId]]]
         Label = Subnet ID
@@ -219,12 +212,9 @@ Order = 10
         ParameterType = Azure.Subnet
         Required = True
 
-
 [parameters Advanced Settings]
-Order = 20
 
     [[parameters Azure Settings]]
-    Order = 10 
 
         [[[parameter Credentials]]]
         Description = The credentials for the cloud provider
@@ -232,7 +222,6 @@ Order = 20
 
     [[parameters Slurm Settings ]]
     Description = "Section for configuring Slurm"
-    Order = 5
 
         [[[parameter configuration_slurm_version]]]
         Required = True
@@ -246,8 +235,7 @@ Order = 20
 
     [[parameters Software]]
     Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
-    Order = 10
-
+    
         [[[parameter MasterImageName]]]
         Label = Master OS
         ParameterType = Cloud.Image
@@ -287,7 +275,6 @@ Order = 20
         Description = Cluster init specs to apply to HPC execute nodes
         ParameterType = Cloud.ClusterInitSpecs
 	
-
     [[parameters Advanced Networking]]
     Description = Advanced networking settings
 
@@ -311,10 +298,8 @@ Order = 20
         Conditions.Excluded := UsePublicNetwork isnt true
 
 [parameters External NFS Filesystems]
-Order = 30
 
     [[parameters NFS Settings]]
-    Order = 28
     Description = "External NFS Export & Mount Settings"
 
         [[[parameter NFSServerName]]]
@@ -372,7 +357,6 @@ Order = 30
         Required = True
 
 [parameters Lustre Settings]
-Order = 25
 Description = "Use a Lustre cluster as a NAS. Settings for defining the Lustre cluster"
 
     [[parameter LustreClusterName]]
