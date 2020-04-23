@@ -25,6 +25,7 @@ Autoscale = $Autoscale
         cyclecloud.exports.sched.disabled = true
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false
+        
         lustre.cluster_name = $LustreClusterName
         lustre.version = $LustreVersion
         lustre.mount_point = $LustreMountPoint
@@ -111,7 +112,7 @@ Autoscale = $Autoscale
       AssociatePublicIpAddress = $ExecuteNodesPublic
 
 [parameters About]
-
+Order = 1
     [[parameters About PB-MECBR-Slurm]]
 
         [[[parameter slurm]]]
@@ -120,6 +121,7 @@ Autoscale = $Autoscale
         Config.Template := "<table><tr><td><img src='https://logodownload.org/wp-content/uploads/2014/05/petrobras-logo-5-1.png' width='192' height='131'></td></tr><tr><td><p>Cyclecloud project with Slurm + Singularity + Azure NetApp Files (ANF).</p><p>See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"        
 
 [parameters Required Settings]
+Order = 10
 
     [[parameters Virtual Machines ]]
     Description = "The cluster, in this case, has two roles: the scheduler master-node with shared filer and the execute hosts. Configure which VM types to use based on the requirements of your application."
@@ -152,7 +154,7 @@ Autoscale = $Autoscale
 
     [[parameters Auto-Scaling]]
     Description = "The cluster can autoscale to the workload, adding execute hosts as jobs are queued. To enable this check the box below and choose the initial and maximum core counts for the cluster"
-    
+    Order = 30
         [[[parameter Autoscale]]]
         Label = Autoscale
         DefaultValue = true
@@ -198,7 +200,7 @@ Autoscale = $Autoscale
         Widget.Label = Use low priority instances for GPU execute hosts
 
     [[parameters Networking]]
-
+    Order = 40
         [[[parameter SubnetId]]]
         Label = Subnet ID
         Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
@@ -206,15 +208,16 @@ Autoscale = $Autoscale
         Required = True
 
 [parameters Advanced Settings]
-
+Order = 20
     [[parameters Azure Settings]]
-
+    Order = 10
         [[[parameter Credentials]]]
         Description = The credentials for the cloud provider
         ParameterType = Cloud.Credentials
 
     [[parameters Slurm Settings ]]
     Description = "Section for configuring Slurm"
+    Order = 5
 
         [[[parameter configuration_slurm_version]]]
         Required = True
@@ -228,6 +231,7 @@ Autoscale = $Autoscale
 
     [[parameters Software]]
     Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
+    Order = 20
     
         [[[parameter MasterImageName]]]
         Label = Master OS
@@ -270,6 +274,7 @@ Autoscale = $Autoscale
 	
     [[parameters Advanced Networking]]
     Description = Advanced networking settings
+    Order = 30
 
         [[[parameter ReturnProxy]]]
         Label = Return Proxy
@@ -291,6 +296,7 @@ Autoscale = $Autoscale
         Conditions.Excluded := UsePublicNetwork isnt true
 
 [parameters External NFS Filesystems]
+Order = 30
 
     [[parameters NFS Settings]]
     Description = "External NFS Export & Mount Settings"
@@ -339,6 +345,7 @@ Autoscale = $Autoscale
 
 [parameters Lustre Settings]
 Description = "Use a Lustre cluster as a NAS. Settings for defining the Lustre cluster"
+Order = 40
 
     [[parameter LustreClusterName]]
     Label = Lustre Cluster
