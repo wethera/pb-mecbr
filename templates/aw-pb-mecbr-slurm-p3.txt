@@ -23,9 +23,10 @@ Autoscale = $Autoscale
         cyclecloud.exports.shared.disabled = true
         cyclecloud.mounts.sched.disabled = true
         cyclecloud.exports.sched.disabled = true
-        cyclecloud.exports.shared.samba.enabled = false
+        cyclecloud.exports.shared.samba.enabled = false 
         cyclecloud.exports.defaults.samba.enabled = false
         
+        lustre.enabled = $LustreEnabled
         lustre.cluster_name = $LustreClusterName
         lustre.version = $LustreVersion
         lustre.mount_point = $LustreMountPoint
@@ -324,13 +325,13 @@ Order = 30
 
         [[[parameter NFSSharedExport]]]
         Label = NFS Shared Export
-        Description = "Configure the /shared filesystem.  This is the Home filesystem and general purpose shared space. (Mountpoint is hard-code to /shared since user Home directories must exist at /shared/home )"
+        Description = "The "shared" export on the NFS server"
         DefaultValue = /mnt/exports/shared
         Required = True
        
         [[[parameter NFSDataExport]]]
         Label = NFS Data Export
-        Description = "Configure the /data filesystem"
+        Description = "The data export on the NFS Server"
         DefaultValue = /mnt/exports/data
         Required = True
 
@@ -342,7 +343,7 @@ Order = 30
 
         [[[parameter NFSSchedExport]]]
         Label = NFS Sched Export
-        Description = "Configure the /sched filesystem"
+        Description = "The sched export on the NFS Server"
         DefaultValue = /mnt/exports/sched
         Required = True
 
@@ -392,14 +393,21 @@ Order = 30
     [[parameters Lustre Settings]]
     Description = "Use a Lustre cluster as a NAS. Settings for defining the Lustre cluster"
     Order = 30
+        [[[parameter LustreEnabled]]]
+        Label = Lustre Enable Switch
+        ParameterType = StringList
+        Config.Label = Dropdown to enable or disable HPC Cache mount
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="Enabled"; Value="Enabled"], [Label="Disabled"; Value="Disabled"]}
+        DefaultValue = Disabled
 
         [[[parameter LustreClusterName]]]
         Label = Lustre Cluster
         Description = Name of the Lustre cluster to connect to. This cluster should be orchestrated by the same CycleCloud Server
-        Required = True
         Config.Plugin = pico.form.QueryDropdown
         Config.Query = select ClusterName as Name from Cloud.Node where Cluster().IsTemplate =!= True && ClusterInitSpecs["lfs:default"] isnt undefined
         Config.SetDefault = false
+        Conditions.Disabled := LustreEnabled == "Disabled"
 
         [[[parameter LustreVersion]]]
         Label = Lustre Version
@@ -407,7 +415,8 @@ Order = 30
         DefaultValue = "2.12"
         Config.FreeForm = false
         Config.Plugin = pico.control.AutoCompleteDropdown
-            
+        Conditions.Disabled := LustreEnabled == "Disabled"
+
             [[[[list Config.Entries]]]]
             Name = "2.10"
             Label = "2.10"
@@ -421,3 +430,4 @@ Order = 30
         Description = The mount point to mount the Lustre file server on.
         DefaultValue = /lustre
         Required = True
+        Conditions.Disabled := LustreEnabled == "Disabled"

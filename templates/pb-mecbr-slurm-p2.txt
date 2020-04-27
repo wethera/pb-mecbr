@@ -26,13 +26,9 @@ Autoscale = $Autoscale
         cyclecloud.exports.shared.samba.enabled = false
         cyclecloud.exports.defaults.samba.enabled = false
         
-        lustre.cluster_name = $LustreClusterName
-        lustre.version = $LustreVersion
-        lustre.mount_point = $LustreMountPoint
         
         [[[cluster-init cyclecloud/slurm:default]]]
         [[[cluster-init pb-mecbr:default:1.0.0]]]
-        [[[cluster-init lfs:client]]]
 
         [[[configuration cyclecloud.mounts.nfs_shared]]]
         type = nfs
@@ -79,6 +75,7 @@ Autoscale = $Autoscale
     ImageName = $HPCImageName
     MaxCoreCount = $MaxHPCExecuteCoreCount
     Azure.MaxScalesetSize = $HPCMaxScalesetSize
+    Interruptible = $HPCUseLowPrio
     AdditionalClusterInitSpecs = $HPCClusterInitSpecs
 
         [[[configuration]]]
@@ -193,6 +190,12 @@ Order = 10
         Config.MinValue = 1
         Config.IntegerOnly = true
 
+        [[[parameter HPCUseLowPrio]]]
+        Label = Low Priority
+        DefaultValue = false
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Use low priority instances for HPC execute hosts
+
         [[[parameter GPUUseLowPrio]]]
         Label = Low Priority
         DefaultValue = false
@@ -211,6 +214,7 @@ Order = 10
 Order = 20
     [[parameters Azure Settings]]
     Order = 10
+    
         [[[parameter Credentials]]]
         Description = The credentials for the cloud provider
         ParameterType = Cloud.Credentials
@@ -343,33 +347,3 @@ Order = 30
         DefaultValue = /sched
         Required = True
 
-[parameters Lustre Settings]
-Description = "Use a Lustre cluster as a NAS. Settings for defining the Lustre cluster"
-Order = 40
-
-    [[parameter LustreClusterName]]
-    Label = Lustre Cluster
-    Description = Name of the Lustre cluster to connect to. This cluster should be orchestrated by the same CycleCloud Server
-    Required = True
-    Config.Plugin = pico.form.QueryDropdown
-    Config.Query = select ClusterName as Name from Cloud.Node where Cluster().IsTemplate =!= True && ClusterInitSpecs["lfs:default"] isnt undefined
-    Config.SetDefault = false
-
-    [[parameter LustreVersion]]
-    Label = Lustre Version
-    Description = The Lustre version to use
-    DefaultValue = "2.12"
-    Config.FreeForm = false
-    Config.Plugin = pico.control.AutoCompleteDropdown
-        [[[list Config.Entries]]]
-        Name = "2.10"
-        Label = "2.10"
-        [[[list Config.Entries]]]
-        Name = "2.12"
-        Label = "2.12"
-    
-    [[parameter LustreMountPoint]]
-    Label = Lustre Mount Point
-    Description = The mount point to mount the Lustre file server on.
-    DefaultValue = /lustre
-    Required = True
