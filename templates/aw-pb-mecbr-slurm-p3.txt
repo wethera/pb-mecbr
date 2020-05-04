@@ -396,7 +396,7 @@ Order = 30
         [[[parameter LustreEnabled]]]
         Label = Lustre Enable Switch
         ParameterType = StringList
-        Config.Label = Dropdown to enable or disable HPC Cache mount
+        Config.Label = Dropdown to enable or disable Lustre mount
         Config.Plugin = pico.form.Dropdown
         Config.Entries := {[Label="Enabled"; Value="Enabled"], [Label="Disabled"; Value="Disabled"]}
         DefaultValue = Disabled
