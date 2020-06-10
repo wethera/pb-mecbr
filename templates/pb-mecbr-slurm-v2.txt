@@ -1,0 +1,506 @@
+################################
+## SLURM + NFS                ##
+################################
+
+[cluster PB-MECBR-Slurm]
+FormLayout = selectionpanel
+Category = Schedulers
+IconUrl = https://logodownload.org/wp-content/uploads/2014/05/petrobras-logo-5-1.png
+Autoscale = $Autoscale
+
+    [[node defaults]]
+    UsePublicNetwork = $UsePublicNetwork
+    Credentials = $Credentials    
+    SubnetId = $SubnetId
+    Region = $Region
+    KeyPairLocation = ~/.ssh/cyclecloud.pem
+    
+        [[[configuration]]]
+        slurm.version = $configuration_slurm_version
+        cyclecloud.selinux.policy = permissive
+        cshared.server.legacy_links_disabled = true
+        cyclecloud.mounts.shared.disabled = true
+        cyclecloud.exports.shared.disabled = true
+        cyclecloud.mounts.sched.disabled = true
+        cyclecloud.exports.sched.disabled = true
+        cyclecloud.exports.shared.samba.enabled = false
+        cyclecloud.exports.defaults.samba.enabled = false
+    
+        [[[cluster-init cyclecloud/slurm:default]]]
+        [[[cluster-init pb-mecbr:default:1.0.0]]]
+
+        [[[configuration cyclecloud.mounts.nfs_shared]]]
+        type = nfs
+        mountpoint = /shared
+        export_path = $NFSSharedExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSServerName
+        
+        [[[configuration cyclecloud.mounts.nfs_sched]]]
+        type = nfs
+        mountpoint = $NFSSchedMountPoint
+        export_path = $NFSSchedExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSServerName
+
+        [[[configuration cyclecloud.mounts.nfs_data]]]
+        type = nfs
+        mountpoint = $NFSDataMountPoint
+        export_path = $NFSDataExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSServerName
+
+        [[[configuration cyclecloud.mounts.nfs_cache]]]
+        disabled = ${NFSCacheEnabled == "Disabled"}
+        type = nfs
+        mountpoint = $NFSCacheMountPoint
+        export_path = $NFSCacheExport
+	    options = defaults,rw,hard,rsize=65536,wsize=65536,vers=3,tcp
+	    address = $NFSCacheName
+
+    [[node master]]
+    MachineType = $MasterMachineType
+    ImageName = $MasterImageName
+    IsReturnProxy = $ReturnProxy
+    AdditionalClusterInitSpecs = $MasterClusterInitSpecs
+    
+        [[[configuration]]]
+
+        [[[cluster-init cyclecloud/slurm:master]]]
+        [[[cluster-init pb-mecbr:master:1.0.0]]]
+
+        [[[network-interface eth0]]]
+		AssociatePublicIpAddress = $UsePublicNetwork		
+		
+        #PrivateIP = 
+
+        [[[input-endpoint ganglia]]]
+        PrivatePort = 8652
+        PublicPort = 8652
+
+    [[nodearray hpc]]
+    MachineType = $HPCMachineType
+    ImageName = $HPCImageName
+    MaxCoreCount = $MaxHPCExecuteCoreCount
+    Azure.MaxScalesetSize = $HPCMaxScalesetSize
+    Interruptible = $HPCUseLowPrio
+    AdditionalClusterInitSpecs = $HPCClusterInitSpecs
+
+        [[[configuration]]]
+        slurm.autoscale = true
+        slurm.default_partition = true
+        slurm.hpc = true
+
+        [[[cluster-init cyclecloud/slurm:execute]]]
+        [[[cluster-init pb-mecbr:hpc:1.0.0]]]
+
+        [[[network-interface eth0]]]
+        AssociatePublicIpAddress = $ExecuteNodesPublic
+
+    [[nodearray gpu]]
+    MachineType = $GPUMachineType
+    ImageName = $GPUImageName
+    MaxCoreCount = $MaxGPUExecuteCoreCount
+    Azure.MaxScalesetSize = $GPUMaxScalesetSize
+    Interruptible = $GPUUseLowPrio
+    AdditionalClusterInitSpecs = $GPUClusterInitSpecs
+
+        [[[configuration]]]
+        slurm.autoscale = true
+        # Set to true if nodes are used for tightly-coupled multi-node jobs
+        slurm.hpc = true
+
+        [[[cluster-init cyclecloud/slurm:execute]]]
+        [[[cluster-init pb-mecbr:gpu:1.0.0]]]
+        
+        [[[network-interface eth0]]]
+        AssociatePublicIpAddress = $ExecuteNodesPublic
+
+    [[nodearray hpc1-hb60]]
+        MachineType = $HPC1MachineType
+        ImageName = $HPC1ImageName
+        MaxCoreCount = $MaxHPC1ExecuteCoreCount
+        Azure.MaxScalesetSize = $HPC1MaxScalesetSize
+        Interruptible = $HPC1UseLowPrio
+        AdditionalClusterInitSpecs = $HPC1ClusterInitSpecs
+
+            [[[configuration]]]
+            slurm.autoscale = true
+            slurm.hpc = true
+
+            [[[cluster-init cyclecloud/slurm:execute]]]
+            [[[cluster-init pb-mecbr:hpc:1.0.0]]]
+
+            [[[network-interface eth0]]]
+            AssociatePublicIpAddress = $ExecuteNodesPublic
+
+    [[nodearray hpc2-d64]]
+        MachineType = $HPC2MachineType
+        ImageName = $HPC2ImageName
+        MaxCoreCount = $MaxHPC2ExecuteCoreCount
+        Azure.MaxScalesetSize = $HPC2MaxScalesetSize
+        Interruptible = $HPC2UseLowPrio
+        AdditionalClusterInitSpecs = $HPC2ClusterInitSpecs
+
+            [[[configuration]]]
+            slurm.autoscale = true
+
+            [[[cluster-init cyclecloud/slurm:execute]]]
+            [[[cluster-init pb-mecbr:hpc:1.0.0]]]
+
+            [[[network-interface eth0]]]
+            AssociatePublicIpAddress = $ExecuteNodesPublic
+
+[parameters About]
+Order = 1
+    [[parameters About PB-MECBR-Slurm]]
+
+        [[[parameter slurm]]]
+        HideLabel = true
+        Config.Plugin = pico.widget.HtmlTemplateWidget
+        Config.Template := "<table><tr><td><img src='https://logodownload.org/wp-content/uploads/2014/05/petrobras-logo-5-1.png' width='192' height='131'></td></tr><tr><td><p>Cyclecloud project with Slurm + Singularity + Azure NetApp Files (ANF).</p><p>See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"
+
+[parameters Required Settings]
+Order = 10
+
+    [[parameters Virtual Machines ]]
+    Description = "The cluster, in this case, has two roles: the scheduler master-node with shared filer and the execute hosts. Configure which VM types to use based on the requirements of your application."
+    Order = 20
+
+        [[[parameter Region]]]
+        Label = Region
+        Description = Deployment Location
+        ParameterType = Cloud.Region
+        DefaultValue = useast
+
+        [[[parameter MasterMachineType]]]
+        Label = Master VM Type
+        Description = The VM type for scheduler master and shared filer.
+        ParameterType = Cloud.MachineType
+        DefaultValue = Standard_D12_v2
+
+        [[[parameter HPCMachineType]]]
+        Label = HPC VM Type
+        Description = The VM type for HPC execute nodes
+        ParameterType = Cloud.MachineType
+        DefaultValue = Standard_HC44rs
+
+        [[[parameter GPUMachineType]]]
+        Label = GPU VM Type
+        Description = The VM type for GPU execute nodes
+        ParameterType = Cloud.MachineType
+        DefaultValue = Standard_NC24rs_v3
+
+        [[[parameter HPC1MachineType]]]
+        Label = HPC1 VM Type
+        Description = The VM type for HPC1 execute nodes
+        ParameterType = Cloud.MachineType
+        DefaultValue = Standard_HB60rs
+
+        [[[parameter HPC2MachineType]]]
+        Label = HPC2 VM Type
+        Description = The VM type for HPC2 execute nodes
+        ParameterType = Cloud.MachineType
+        DefaultValue = Standard_D64s_v3
+
+    [[parameters Auto-Scaling]]
+    Description = "The cluster can autoscale to the workload, adding execute hosts as jobs are queued. To enable this check the box below and choose the initial and maximum core counts for the cluster"
+    Order = 30
+        [[[parameter Autoscale]]]
+        Label = Autoscale
+        DefaultValue = true
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Start and stop execute instances automatically
+
+        [[[parameter MaxHPCExecuteCoreCount]]]
+        Label = Max HPC Cores
+        Description = The total number of HPC execute cores to start
+        DefaultValue = 1000
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter MaxGPUExecuteCoreCount]]]
+        Label = Max GPU Cores
+        Description = The total number of GPU execute cores to start
+        DefaultValue = 1000
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter MaxHPC1ExecuteCoreCount]]]
+        Label = Max HPC1 Cores
+        Description = The total number of HPC1 execute cores to start
+        DefaultValue = 1000
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter MaxHPC2ExecuteCoreCount]]]
+        Label = Max HPC2 Cores
+        Description = The total number of HPC2 execute cores to start
+        DefaultValue = 1000
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter HPCMaxScalesetSize]]]
+        Label = Max HPC VMs per Scaleset
+        Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
+        DefaultValue = 100
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter HPC1MaxScalesetSize]]]
+        Label = Max HPC1 VMs per Scaleset
+        Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
+        DefaultValue = 100
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter HPC2MaxScalesetSize]]]
+        Label = Max HPC2 VMs per Scaleset
+        Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
+        DefaultValue = 100
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter GPUMaxScalesetSize]]]
+        Label = Max GPU VMs per Scaleset
+        Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
+        DefaultValue = 100
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter GPUUseLowPrio]]]
+        Label = Low Priority
+        DefaultValue = false
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Use low priority instances for GPU execute hosts
+
+        [[[parameter HPCUseLowPrio]]]
+        Label = Low Priority
+        DefaultValue = false
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Use low priority instances for HPC execute hosts
+
+        [[[parameter HPC1UseLowPrio]]]
+        Label = Low Priority
+        DefaultValue = false
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Use low priority instances for HPC1 execute hosts
+
+        [[[parameter HPC2UseLowPrio]]]
+        Label = Low Priority
+        DefaultValue = false
+        Widget.Plugin = pico.form.BooleanCheckBox
+        Widget.Label = Use low priority instances for HPC2 execute hosts
+
+
+
+    [[parameters Networking]]
+    Order = 40
+        [[[parameter SubnetId]]]
+        Label = Subnet ID
+        Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
+        ParameterType = Azure.Subnet
+        Required = True
+
+[parameters Advanced Settings]
+Order = 20
+    [[parameters Azure Settings]]
+    Order = 10 
+
+        [[[parameter Credentials]]]
+        Description = The credentials for the cloud provider
+        ParameterType = Cloud.Credentials
+
+    [[parameters Slurm Settings ]]
+    Description = "Section for configuring Slurm"
+    Order = 5
+
+        [[[parameter configuration_slurm_version]]]
+        Required = True
+        Label = Slurm Version
+        Description = Version of Slurm to install on the cluster
+        ParameterType = StringList
+        Config.Plugin = pico.form.Dropdown
+        Config.FreeForm = true
+        Config.Entries := {[Value="19.05.5-1"], [Value="18.08.9-1"]}
+        DefaultValue = 19.05.5-1
+        
+    [[parameters Software]]
+    Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
+    Order = 20
+
+        [[[parameter MasterImageName]]]
+        Label = Master OS
+        ParameterType = Cloud.Image
+        Config.OS = linux
+        DefaultValue = cycle.image.centos7
+        Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
+
+        [[[parameter HPCImageName]]]
+        Label = HPC OS
+        ParameterType = Cloud.Image
+        Config.OS = linux
+        DefaultValue = /subscriptions/8a4b4915-96e4-4740-b39a-bc81ea3331fe/resourceGroups/HPC-PETRO/providers/Microsoft.Compute/images/hpc-cc-image
+        Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
+
+        [[[parameter GPUImageName]]]
+        Label = GPU OS
+        ParameterType = Cloud.Image
+        Config.OS = linux
+        DefaultValue = /subscriptions/8a4b4915-96e4-4740-b39a-bc81ea3331fe/resourceGroups/HPC-Petro/providers/Microsoft.Compute/images/hpc-cc-gpu-image
+        Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
+
+        [[[parameter HPC1ImageName]]]
+        Label = HPC OS
+        ParameterType = Cloud.Image
+        Config.OS = linux
+        DefaultValue = /subscriptions/8a4b4915-96e4-4740-b39a-bc81ea3331fe/resourceGroups/HPC-PETRO/providers/Microsoft.Compute/images/hpc-cc-image
+        Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
+
+        [[[parameter HPC2ImageName]]]
+        Label = HPC OS
+        ParameterType = Cloud.Image
+        Config.OS = linux
+        DefaultValue = /subscriptions/8a4b4915-96e4-4740-b39a-bc81ea3331fe/resourceGroups/HPC-PETRO/providers/Microsoft.Compute/images/hpc-cc-image
+        Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu18"}
+
+        [[[parameter MasterClusterInitSpecs]]]
+        Label = Master Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to the master node
+        ParameterType = Cloud.ClusterInitSpecs
+    
+        [[[parameter GPUClusterInitSpecs]]]
+        Label = GPU Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to GPU execute nodes
+        ParameterType = Cloud.ClusterInitSpecs
+        
+        [[[parameter HPCClusterInitSpecs]]]
+        Label = HPC Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to HPC execute nodes
+        ParameterType = Cloud.ClusterInitSpecs
+	
+        [[[parameter HPC1ClusterInitSpecs]]]
+        Label = HPC1 Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to HPC execute nodes
+        ParameterType = Cloud.ClusterInitSpecs
+
+        [[[parameter HPC2ClusterInitSpecs]]]
+        Label = HPC2 Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to HPC execute nodes
+        ParameterType = Cloud.ClusterInitSpecs
+
+    [[parameters Advanced Networking]]
+    Description = Advanced networking settings
+    Order = 30
+
+        [[[parameter ReturnProxy]]]
+        Label = Return Proxy
+        DefaultValue = true
+        ParameterType = Boolean
+        Config.Label = Use SSH tunnel to connect to CycleCloud (required if direct access is blocked)
+
+        [[[parameter UsePublicNetwork]]]
+        Label = Public Head Node
+        DefaultValue = true
+        ParameterType = Boolean
+        Config.Label = Access master node from the Internet
+
+        [[[parameter ExecuteNodesPublic]]]
+        Label = Public Execute
+        DefaultValue = false
+        ParameterType = Boolean
+        Config.Label = Access execute nodes from the Internet
+        Conditions.Excluded := UsePublicNetwork isnt true
+
+[parameters External Filesystems]
+Order = 30
+
+    [[parameters NFS Settings]]
+    Description = "External NFS Export & Mount Settings"
+    Order = 10
+
+
+        [[[parameter NFSServerName]]]
+        Label = NFS Server name or IP address
+        Description = The NFS server name or ip address.
+        DefaultValue = 10.0.8.4
+        Required = True
+
+        [[[parameter NFSSchedExport]]]
+        Label = NFS Sched  Export
+        Description = "The sched export on the NFS Server"
+        DefaultValue = /sched
+        Required = True
+
+        [[[parameter NFSSchedMountPoint]]]
+        Label = NFS Shared Home Mountpoint 
+        Description = "The /sched mountpoint"
+        DefaultValue = /sched
+        Required = True
+
+        [[[parameter NFSSharedExport]]]
+        Label = NFS Shared Home Export
+        Description = "The "shared" export on the NFS server"
+        DefaultValue = /anfhpc
+        Required = True
+
+        [[[parameter NFSSharedMountPoint]]]
+        Label = NFS Shared Home Mountpoint 
+        Description = "The "shared" mountpoint"
+        DefaultValue = /shared
+        Required = True
+
+        [[[parameter NFSDataExport]]]
+        Label = NFS Data Export
+        Description = "The data export on the NFS Server"
+        DefaultValue = /brapps
+        Required = True
+
+        [[[parameter NFSDataMountPoint]]]
+        Label = NFS Data Mountpoint 
+         Description = "The /data mountpoint" 
+        DefaultValue = /brapps
+        Required = True
+
+    [[parameters HPC Cache Settings]]
+    Description = "HPC Cache mount settings"
+    Order = 20
+
+        [[[parameter NFSCacheEnabled]]]
+        Label = HPC Cache mount
+        ParameterType = StringList
+        Config.Label = Dropdown to enable or disable HPC Cache mount
+        Config.Plugin = pico.form.Dropdown
+        Config.Entries := {[Label="Enabled"; Value="Enabled"], [Label="Disabled"; Value="Disabled"]}
+        DefaultValue = Disabled
+
+        [[[parameter NFSCacheName]]]
+        Label = NFS Cache name or IP address
+        Description = The NFS cache name or IP address.
+        DefaultValue = =undefined
+        Conditions.Disabled := NFSCacheEnabled == "Disabled"
+
+        [[[parameter NFSCacheExport]]]
+        Label = NFS Cache Export
+        Description = "Configure the /cache filesystem export or namespace"
+        DefaultValue = /mnt/exports/cache
+        Conditions.Disabled := NFSCacheEnabled == "Disabled"
+              
+        [[[parameter NFSCacheMountPoint]]]
+        Label = NFS Cache Mountpoint
+        Description = "Configure the /cache filesystem"
+        DefaultValue = /cache
+        Conditions.Disabled := NFSCacheEnabled == "Disabled"
